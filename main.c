@@ -5,8 +5,29 @@
 int hexToInt(unsigned char* number){
 	return (int) (number[1]<< 8 | number[0]);
 }
+void  isEquals(unsigned short* fat0,unsigned short* fat1, int fatClusterSize){
+	int i=0;
+	for(i=3;i<fatClusterSize;i++){
+		if(fat0[i]!=fat1[i]){
+			printf("DIFF %d:%d,%d",i,fat0[i],fat1[i]);
+		}
 
+	}
 
+}
+void blocosRemovidos(unsigned short* fat, int fatSize, int numBytePos, FILE* file){
+	int i = 0;
+	unsigned char entry[32];
+	fseek(file,numBytePos,SEEK_SET);
+	for(i=0;i<fatSize;i++){
+		fread(entry,32,1,file);
+		if(entry[0]==229 && fat[i]!=0){
+			printf("REMOVIDOS %d ",i);
+		}
+	}
+	printf("\n");
+
+}
 int main(int argc, char* argv[] ){
 	FILE *file;
 	if(!(file = fopen("disco2","r+"))){
