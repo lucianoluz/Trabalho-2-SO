@@ -15,11 +15,24 @@ void  isEquals(unsigned short* fat0,unsigned short* fat1, int fatClusterSize){
 	}
 
 }
-void blocosRemovidos(unsigned short* fat, int fatSize, int numBytePos, FILE* file){
+void emptyBlocks(unsigned short* fat, int fatClusterSize){
+	int i = 0;
+	for(i=3; i<fatClusterSize; i++){
+		if(fat[i]==0){
+			printf("LIVRE %d",i);
+		}
+	}
+}
+void copyFat(unsigned short* resultFat, int fatPos, int fatClusterSize,  FILE* file){
+	 fseek(file, fatPos, SEEK_SET);
+	 fwrite(resultFat, 2, fatClusterSize, file);
+}
+
+void removedBlocks(unsigned short* fat, int fatClusterSize, int numBytePos, FILE* file){
 	int i = 0;
 	unsigned char entry[32];
 	fseek(file,numBytePos,SEEK_SET);
-	for(i=0;i<fatSize;i++){
+	for(i=0;i<fatClusterSize;i++){
 		fread(entry,32,1,file);
 		if(entry[0]==229 && fat[i]!=0){
 			printf("REMOVIDOS %d ",i);
@@ -28,6 +41,7 @@ void blocosRemovidos(unsigned short* fat, int fatSize, int numBytePos, FILE* fil
 	printf("\n");
 
 }
+
 int main(int argc, char* argv[] ){
 	FILE *file;
 	if(!(file = fopen("disco2","r+"))){
@@ -70,7 +84,9 @@ int main(int argc, char* argv[] ){
 	int numBytesPos =  rootPos * hexToInt(bytesSector);
 	//printf("%zx \n" , fat0[0]);
 	//printf("%zx \n" , fat1[0]);
-	isEquals(fat0,fat1,fatClusterSize);
-	blocosRemovidos(fat0,fatSize,numBytesPos,file);
+	//isEquals(fat0,fat1,fatClusterSize);
+	removedBlocks(fat0,fatClusterSize,numBytesPos,file);
 
+	copyFat(fat1,fatSize,fatClusterSize,file);
+	emptyBlocks(fat0,fatClusterSize);
 }
